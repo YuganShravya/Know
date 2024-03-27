@@ -1,0 +1,93 @@
+```python
+import pygame
+import random
+import sys
+
+# Initialize Pygame
+pygame.init()
+
+# Set up display
+WIDTH, HEIGHT = 800, 600
+win = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Extended Car Racing Game")
+
+# Colors
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+
+# Car properties
+car_width = 50
+car_height = 100
+car_x = WIDTH // 2 - car_width // 2
+car_y = HEIGHT - car_height - 10
+car_speed = 5
+
+# Obstacle properties
+obstacle_width = 100
+obstacle_height = 20
+obstacle_speed = 5
+obstacles = []
+
+score = 0
+font = pygame.font.Font(None, 36)
+
+clock = pygame.time.Clock()
+
+def draw_car(x, y):
+    pygame.draw.rect(win, WHITE, (x, y, car_width, car_height))
+
+def draw_obstacle(x, y):
+    pygame.draw.rect(win, RED, (x, y, obstacle_width, obstacle_height))
+
+def game_over():
+    text = font.render("Game Over - Score: " + str(score), True, WHITE)
+    text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    win.blit(text, text_rect)
+    pygame.display.flip()
+    pygame.time.delay(2000)
+    pygame.quit()
+    sys.exit()
+
+# Game loop
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        car_x -= car_speed
+    if keys[pygame.K_RIGHT]:
+        car_x += car_speed
+
+    # Move the obstacles
+    for obstacle in obstacles:
+        obstacle['y'] += obstacle_speed
+        if obstacle['y'] > HEIGHT:
+            obstacle['y'] = -obstacle_height
+            obstacle['x'] = random.randint(0, WIDTH - obstacle_width)
+            score += 1
+
+        if car_x < obstacle['x'] + obstacle_width and car_x + car_width > obstacle['x'] and car_y < obstacle['y'] + obstacle_height and car_y + car_height > obstacle['y']:
+            game_over()
+
+    # Create new obstacles
+    if len(obstacles) < 5:
+        obstacles.append({'x': random.randint(0, WIDTH - obstacle_width), 'y': random.randint(-HEIGHT, 0)})
+
+    # Clear the screen
+    win.fill((0, 0, 0))
+
+    # Draw the car and obstacles
+    draw_car(car_x, car_y)
+    for obstacle in obstacles:
+        draw_obstacle(obstacle['x'], obstacle['y'])
+
+    # Display score
+    score_text = font.render("Score: " + str(score), True, WHITE)
+    win.blit(score_text, (10, 10))
+
+    pygame.display.update()
+    clock.tick(30)
+```
